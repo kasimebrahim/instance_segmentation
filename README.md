@@ -10,4 +10,4 @@ Semantic labels are below:
 * Header
 * Footer
 * Page
-* Signiture
+* Signature
