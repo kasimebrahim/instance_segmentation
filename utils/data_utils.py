@@ -119,3 +119,37 @@ def findkey(pat, keys):
         if pat == m_name:
             return m_k
     raise ValueError("Key not found in reference json!");
+
+#########################################################
+# Split Data in dir into two.
+#########################################################
+def split_data(dir, size):
+    main = json.load(open(os.path.join(dir, "labels.json")))
+    keys = list(main.keys())
+
+    part = {}
+    t_path = os.path.join(dir, "train")
+    v_path = os.path.join(dir, "validation")
+
+    try:
+        os.mkdir(t_path)
+        os.mkdir(v_path)
+    except OSError:
+        print ("Creation of the directory failed")
+
+    for n in range(size):
+        k = random.choice(keys)
+        part[k] = main.pop(k)
+        shutil.move(os.path.join(dir, part[k]["filename"]),
+                        os.path.join(v_path, part[k]["filename"]))
+        keys.remove(k)
+
+    for k in keys:
+        shutil.move(os.path.join(dir, main[k]["filename"]),
+                        os.path.join(t_path, main[k]["filename"]))
+
+    with open(os.path.join(t_path, "labels.json"), 'w') as out:
+        json.dump(main, out, sort_keys=True, indent=4)
+
+    with open(os.path.join(v_path, "labels.json"), 'w') as out:
+        json.dump(part, out, sort_keys=True, indent=4)
