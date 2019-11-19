@@ -54,7 +54,7 @@ def merge_json(dir, sub_dir):
         json.dump(data, out, sort_keys=True, indent=4)
 
     return sub_dir
-    
+
 ##############################################################
 # Merge all images of jpg extenssion in dir,and store in sub_dir.
 ##############################################################
@@ -75,3 +75,47 @@ def merge_images(dir, sub_dir):
 def prep_data(dir, sub_dir):
     merge_json(dir, sub_dir)
     merge_images(dir, sub_dir)
+
+#########################################################
+# Edit annotations of json in main_path with reference json
+# file in ref_path.
+# This is usefull to convetert an annotated dataset with a
+# wrong image format. When the image format and size change
+# we need to applay the neccessary edit in the annotations.
+# And this will help with that.
+#
+# USAGE:
+# step1:- convert the images to jpg format with an external
+#         tool.
+# step2:- Import the converted images to the VIA-annotator
+#         and export json annotations with empty annotation.
+#         The json will contain the right file-name and size.
+# step3:- Call this function with the original annotation and
+#         the above new empty annotation json as a reference.
+# The output json will contain the right annotation for
+# the converted images.
+#########################################################
+def label_rename(main_path, ref_path):
+    main = json.load(open(main_path))
+    ref = json.load(open(ref_path))
+
+    main_k = list(main.keys())
+    ref_k = list(ref.keys())
+
+    for m_k in main_k:
+        m_name, ext = m_k.rsplit(".", 1)
+        if "png" in ext:
+            r_k = findkey(m_name, ref_k)
+            main[m_k]["filename"] = ref[r_k]["filename"]
+            main[m_k]["size"] = ref[r_k]["size"]
+            main[r_k] = main.pop(m_k)
+
+    with open(main_path + "_edited", 'w') as out:
+        json.dump(main, out, sort_keys=True, indent=4)
+
+def findkey(pat, keys):
+    for m_k in keys:
+        m_name, ext = m_k.rsplit(".", 1)
+        if pat == m_name:
+            return m_k
+    raise ValueError("Key not found in reference json!");
