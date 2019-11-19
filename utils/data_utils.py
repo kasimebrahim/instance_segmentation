@@ -153,3 +153,49 @@ def split_data(dir, size):
 
     with open(os.path.join(v_path, "labels.json"), 'w') as out:
         json.dump(part, out, sort_keys=True, indent=4)
+
+#########################################################
+# This converts the json annotation of PUBLAYNET dataset
+# into VIA json format.
+#########################################################
+def prep_publaynet(dir):
+    main = json.load(open(dir))
+
+    imgs = main["images"]
+    anns = main["annotations"]
+    cats = main["categories"]
+
+    result = {}
+    for img in imgs:
+        data = {
+            "base64_img_data": "",
+            "file_attributes" : {},
+            "filename" : img["file_name"],
+            "fileref" : ""
+        }
+        regions = {}
+        r=0
+        for cat, reg in region_generator(anns, img["id"]):
+            regions[str(r)] = {
+                "region_attributes" : {"type": cats[cat-1]["name"]},
+                "shape_attributes" : reg
+            }
+            r+=1
+        data["regions"] = regions
+        img_id = img["file_name"] + str(img["id"])
+        result[img_id] = data
+
+    with open(dir+"VIA", 'w') as out:
+        json.dump(result, out, sort_keys=True, indent=4)
+
+def region_generator(anns, image_id):
+    for ann in anns:
+        if ann["image_id"] == image_id:
+            region = {
+                "name" : "rect",
+                "x" : int(ann["bbox"][0]),
+                "y" : int(ann["bbox"][1]),
+                "width" : int(ann["bbox"][2]),
+                "height" : int(ann["bbox"][3])
+            }
+            yield (ann["category_id"], region)
