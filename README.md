@@ -66,3 +66,9 @@ To segment your documents
   #      i:e ds/doc_p01.jpg
 </pre>
 The out put of the segmented documents will be stored in a json file named "documents.json".
+
+## Acknowledgements
+This repository heavily reuses code from the amazing [tensorflow Mask RCNN implementation](https://github.com/matterport/Mask_RCNN) by [@waleedka](https://github.com/waleedka/). Many thanks to all the contributors of that project. You are encouraged to checkout https://github.com/matterport/Mask_RCNN for documentation on many other aspects of this code.
+
+## Author
+Kasim Ebrahim se.kasim.ebrahim@gmail.com
